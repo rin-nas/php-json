@@ -4,19 +4,19 @@
  *
  * Since PHP/5.2.0 there is a feature json_encode() and json_decode(),
  * but the choice of this class is preferable.
- * 
+ *
  * JSON::encode() features
  *   * Not only works with UTF-8, but also with any other single-byte encodings (eg: windows-1251, koi8-r)
  *   * Is able to convert numbers represented a string data type into the corresponding numeric data types (optional)
  *   * Non-ASCII characters leave as is, and does not convert to \uXXXX.
- * 
+ *
  * JSON::decode() features
  *   * Normalizes a "dirty" JSON string, coming from JavaScript (smart behavior -- only if necessary)
  *
  * @link     http://code.google.com/p/php-json/
  * @license  http://creativecommons.org/licenses/by-sa/3.0/
  * @author   Nasibullin Rinat
- * @version  2.1.0
+ * @version  2.1.1
  */
 class JSON
 {
@@ -52,10 +52,16 @@ class JSON
 	 * @param   mixed  $object
 	 * @return  mixed
 	 */
-	public static function object2array($object)
+	public static function objectToArray($object)
 	{
-		if (is_object($object)) $object = (array)$object;  #$object = get_object_vars($object);
-		if (is_array($object)) foreach ($object as $k => $v) $object[$k] = self::object2array($v);
+		if ($object instanceof Traversable)
+		{
+			$vars = array();
+			foreach ($object as $k => $v) $vars[$k] = $v;
+			$object = $vars;
+		}
+		elseif (is_object($object)) $object = get_object_vars($object); #$object = (array)$object;
+		if (is_array($object)) foreach ($object as $k => $v) $object[$k] = self::objectToArray($v);
 		return $object;
 	}
 
@@ -96,7 +102,7 @@ class JSON
 			$escape_table = self::$escape_table + ($quote !== '"' ? self::$spec_escape_table : array());
 			return $quote . strtr($a, $escape_table) . $quote;
 		}
-		if (is_object($a)) $a = self::object2array($a);
+		if (is_object($a)) $a = self::objectToArray($a);
 		elseif (! is_array($a))
 		{
 			trigger_error('An any type (except a resource) expected, ' . gettype($a) . ' given!', E_USER_WARNING);
@@ -155,8 +161,8 @@ class JSON
 	}
 
 	/**
-	 * Converts JavaScript to JSON syntax
-	 * Normalizes a "dirty" JSON string, coming from JavaScript
+	 * Converts malformed JSON to well-formed JSON
+	 * Hint: normalizes a "dirty" JSON string, coming from JavaScript
 	 *
 	 * @param   string|null      $s The json string being normalized
 	 * @return  string|bool|null    Returns FALSE if error occured
