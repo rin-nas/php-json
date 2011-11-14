@@ -16,7 +16,7 @@
  * @link     http://code.google.com/p/php-json/
  * @license  http://creativecommons.org/licenses/by-sa/3.0/
  * @author   Nasibullin Rinat
- * @version  2.1.1
+ * @version  2.1.2
  */
 class JSON
 {
@@ -74,7 +74,7 @@ class JSON
 	 * @param   string                    $quote               Quote char: '"', "'" or '' (empty)
 	 * @param   bool                      $is_convert_numeric  Convert numbers represented a string data type in the corresponding numeric data types
 	 * @param   bool                      $_is_key             Private for recursive calling
-	 * @return  string|bool               Returns FALSE if error occured
+	 * @return  string|bool               Returns FALSE if error occurred
 	 */
 	public static function encode($a, $quote = '"', $is_convert_numeric = false, $_is_key = false)
 	{
@@ -165,7 +165,7 @@ class JSON
 	 * Hint: normalizes a "dirty" JSON string, coming from JavaScript
 	 *
 	 * @param   string|null      $s The json string being normalized
-	 * @return  string|bool|null    Returns FALSE if error occured
+	 * @return  string|bool|null    Returns FALSE if error occurred
 	 */
 	public static function normalize($s)
 	{
@@ -215,7 +215,7 @@ class JSON
 			$s = preg_replace_callback(
 				'~(?> \\\\u([\da-fA-F]{4}) #1
 					| \\\\(.)              #2
-					| .
+					| [^\\\\]++
 					)~sxSX',
 				function(array $m) use ($unescape_table)
 				{
@@ -248,7 +248,7 @@ class JSON
 		assert_options(ASSERT_WARNING,  true);
 		assert_options(ASSERT_QUIET_EVAL, false);
 
-		$s0 = '{"1":2,"33":-44.11,"<tag>":"&bar&","null":null,"true":true,"false":false,"c":"d","e":"f","\/":"\/","ПРИВЕТ":"привет","new\r\nline":"new\nline","\'":"\\"","g":[1,"a","b","c"]}';
+		$s0 = '{"1":2,"33":-44.11,"<tag>":"&bar&","null":null,"true":true,"false":false,"c":"d","e":"f","\/":"\/","ПРИВЕТ":"привет","new\r\n\\\\line":"next\nline","\'":"\\"","g":[1,"a","b","c"]}';
 		$s1 = '{
 			  //single line comment
 			  1:2,
@@ -267,7 +267,7 @@ class JSON
 			  "e" : "f",
 			  "/": "\/",
 			  "ПРИВЕТ": \'привет\' ,
-			  "new\r\nline" : "new\\
+			  "new\r\n\\\\line" : "next\\
 line",
 			  "\\\'" : \'"\',
 			  g:[1,\'a\' ,\'b\', \'c\' , ],
